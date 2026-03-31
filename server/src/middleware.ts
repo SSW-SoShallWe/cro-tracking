@@ -4,7 +4,8 @@ import { Request, Response, NextFunction } from 'express';
 import { config } from './config';
 
 export const corsMiddleware = cors({
-  origin: config.corsOrigins.includes('*') ? '*' : config.corsOrigins,
+  origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'X-Tracking-Key'],
 });
