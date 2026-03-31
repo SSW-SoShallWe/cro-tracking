@@ -2,7 +2,10 @@
   'use strict';
 
   // --- Find our own script tag ---
-  var scriptTag = document.currentScript;
+  // document.currentScript works for static script tags.
+  // Falls back to querySelector for dynamically injected scripts (GHL, GTM, etc.)
+  var scriptTag = document.currentScript
+    || document.querySelector('script[src*="ab.js"][data-test-id]');
   if (!scriptTag) return;
 
   var testId = scriptTag.getAttribute('data-test-id');
