@@ -1,0 +1,9 @@
+{
+  "name": "cro-tracker",
+  "private": true,
+  "scripts": {
+    "dev": "cd server && npm run dev",
+    "build": "cd server && npm run build",
+    "start": "cd server && npm start"
+  }
+}
