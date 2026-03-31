@@ -5,7 +5,7 @@
   // document.currentScript works for static script tags.
   // Falls back to querySelector for dynamically injected scripts (GHL, GTM, etc.)
   var scriptTag = document.currentScript
-    || document.querySelector('script[src*="cro-tracking"][data-test-id]');
+    || document.querySelector('script[src*="cro-tracking"]');
   if (!scriptTag) return;
 
   var testId = scriptTag.getAttribute('data-test-id');
