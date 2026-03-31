@@ -42,7 +42,7 @@ The page view is tracked automatically as soon as the script loads. No extra cod
 
 ## Tracking clicks and form submits
 
-### Option A: You control the HTML (custom landings)
+### Option A: You control the HTML (custom elements) 
 
 Add `data-ab-click` to any clickable element and `data-ab-submit` to any form:
 
@@ -66,7 +66,7 @@ Use named selectors to tell the tracker which elements to watch and what to call
   data-test-id="headline_june_01"
   data-landing-id="mortgage_lp_01"
   data-variant-id="A"
-  data-ab-clicks='{"hero_cta": ".button-aLgelNHdkl_btn", "footer_cta": ".button-xYz123_btn"}'
+  data-ab-clicks='{"hero_cta": ".hero-btn", "footer_cta": ".ftr-btn"}'
   data-ab-submits='{"main_form": "form"}'
 ></script>
 ```
@@ -74,15 +74,8 @@ Use named selectors to tell the tracker which elements to watch and what to call
 The format is JSON: `{"your_name": ".css-selector"}`. You choose the name, the CSS selector targets the GHL element.
 
 - `hero_cta`, `footer_cta`, `main_form` — **these are your names**, they show up in the report data
-- `.button-aLgelNHdkl_btn` — **this is GHL's class**, you find it by inspecting the element
+- `.hero-btn` — **this is GHL's class**, you find it by inspecting the element
 
-**How to find the CSS selector for a GHL element:**
-
-1. Open the landing page in Chrome
-2. Right-click the CTA button > **Inspect**
-3. Look at the element's class name, e.g. `<a class="button-aLgelNHdkl_btn">`
-4. Use `.button-aLgelNHdkl_btn` as the selector
-5. Give it a human-readable name like `hero_cta`
 
 **You can track multiple buttons separately:**
 ```html
@@ -120,12 +113,11 @@ Use the JavaScript API after the tracker loads:
 </script>
 ```
 
-For Typeform specifically, use their `onSubmit` callback:
+For Typeform specifically, listen for the submit message:
 ```html
 <script>
-  window.tf.createWidget('YOUR_FORM_ID', {
-    container: document.getElementById('typeform-container'),
-    onSubmit: function () {
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'form-submit') {
       window.abTracker.sendEvent('form_submit', { form_id: 'typeform_main' });
     }
   });
