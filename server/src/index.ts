@@ -18,7 +18,9 @@ app.use(eventsRouter);
 app.use(reportRouter);
 
 // Serve tracker script
-app.use('/ab.js', express.static(path.join(__dirname, '../../tracker/ab.js')));
+app.get('/ab.js', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../../tracker/ab.js'));
+});
 
 // Serve demo pages in development
 if (process.env.NODE_ENV !== 'production') {

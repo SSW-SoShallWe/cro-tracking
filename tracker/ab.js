@@ -58,8 +58,16 @@
     var headers = { 'Content-Type': 'application/json' };
     if (trackingKey) headers['X-Tracking-Key'] = trackingKey;
 
-    // Prefer sendBeacon for reliability on page unload, fallback to fetch
-    if (navigator.sendBeacon) {
+    // Use fetch when tracking key is set (sendBeacon can't send custom headers).
+    // Use sendBeacon otherwise for reliability on page unload.
+    if (trackingKey) {
+      fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(function () {});
+    } else if (navigator.sendBeacon) {
       var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
       navigator.sendBeacon(url, blob);
     } else {
