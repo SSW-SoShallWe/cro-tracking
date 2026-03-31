@@ -10,6 +10,8 @@
   var variantId = scriptTag.getAttribute('data-variant-id');
   var endpoint = scriptTag.getAttribute('data-endpoint') || scriptTag.src.replace(/\/ab\.js.*$/, '');
   var trackingKey = scriptTag.getAttribute('data-tracking-key') || '';
+  var clickSelector = scriptTag.getAttribute('data-ab-click-selector') || '';
+  var submitSelector = scriptTag.getAttribute('data-ab-submit-selector') || '';
 
   if (!testId || !landingId || !variantId) {
     console.warn('[ab-tracker] Missing required data attributes: data-test-id, data-landing-id, data-variant-id');
@@ -89,18 +91,36 @@
 
   // --- Auto: cta_click ---
   document.addEventListener('click', function (e) {
+    // Match by data-ab-click attribute
     var el = e.target.closest('[data-ab-click]');
-    if (!el) return;
-    var ctaId = el.getAttribute('data-ab-click');
-    sendEvent('cta_click', { cta_id: ctaId });
+    if (el) {
+      sendEvent('cta_click', { cta_id: el.getAttribute('data-ab-click') });
+      return;
+    }
+    // Match by CSS selector (for platforms like GHL where you can't add data attributes)
+    if (clickSelector) {
+      var matched = e.target.closest(clickSelector);
+      if (matched) {
+        sendEvent('cta_click', { cta_id: matched.id || matched.className || 'cta' });
+      }
+    }
   });
 
   // --- Auto: form_submit ---
   document.addEventListener('submit', function (e) {
+    // Match by data-ab-submit attribute
     var form = e.target.closest('[data-ab-submit]');
-    if (!form) return;
-    var formId = form.getAttribute('data-ab-submit');
-    sendEvent('form_submit', { form_id: formId });
+    if (form) {
+      sendEvent('form_submit', { form_id: form.getAttribute('data-ab-submit') });
+      return;
+    }
+    // Match by CSS selector
+    if (submitSelector) {
+      var matched = e.target.closest(submitSelector);
+      if (matched) {
+        sendEvent('form_submit', { form_id: matched.id || 'form' });
+      }
+    }
   });
 
   // --- Public API ---
