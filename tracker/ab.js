@@ -16,6 +16,12 @@
   var clickSelector = scriptTag.getAttribute('data-ab-click-selector') || '';
   var submitSelector = scriptTag.getAttribute('data-ab-submit-selector') || '';
 
+  // Named selector maps: {"hero_cta": ".btn-hero", "footer_cta": ".btn-footer"}
+  var clickMap = {};
+  var submitMap = {};
+  try { clickMap = JSON.parse(scriptTag.getAttribute('data-ab-clicks') || '{}'); } catch (e) {}
+  try { submitMap = JSON.parse(scriptTag.getAttribute('data-ab-submits') || '{}'); } catch (e) {}
+
   if (!testId || !landingId || !variantId) {
     console.warn('[ab-tracker] Missing required data attributes: data-test-id, data-landing-id, data-variant-id');
     return;
@@ -100,7 +106,16 @@
       sendEvent('cta_click', { cta_id: el.getAttribute('data-ab-click') });
       return;
     }
-    // Match by CSS selector (for platforms like GHL where you can't add data attributes)
+    // Match by named selector map: data-ab-clicks='{"hero_cta": ".btn-hero"}'
+    var clickMapKeys = Object.keys(clickMap);
+    for (var i = 0; i < clickMapKeys.length; i++) {
+      var name = clickMapKeys[i];
+      if (e.target.closest(clickMap[name])) {
+        sendEvent('cta_click', { cta_id: name });
+        return;
+      }
+    }
+    // Match by single CSS selector (legacy)
     if (clickSelector) {
       var matched = e.target.closest(clickSelector);
       if (matched) {
@@ -117,7 +132,16 @@
       sendEvent('form_submit', { form_id: form.getAttribute('data-ab-submit') });
       return;
     }
-    // Match by CSS selector
+    // Match by named selector map: data-ab-submits='{"main_form": "form.contact"}'
+    var submitMapKeys = Object.keys(submitMap);
+    for (var j = 0; j < submitMapKeys.length; j++) {
+      var sname = submitMapKeys[j];
+      if (e.target.closest(submitMap[sname])) {
+        sendEvent('form_submit', { form_id: sname });
+        return;
+      }
+    }
+    // Match by single CSS selector (legacy)
     if (submitSelector) {
       var matched = e.target.closest(submitSelector);
       if (matched) {
