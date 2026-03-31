@@ -56,9 +56,9 @@ Add `data-ab-click` to any clickable element and `data-ab-submit` to any form:
 </form>
 ```
 
-### Option B: You can't edit the HTML (GHL, page builders)
+### Option B: You can't edit the HTML (GHL, page builders) — RECOMMENDED FOR GHL
 
-Use CSS selectors on the script tag to tell the tracker what to watch:
+Use named selectors to tell the tracker which elements to watch and what to call them:
 
 ```html
 <script
@@ -66,28 +66,41 @@ Use CSS selectors on the script tag to tell the tracker what to watch:
   data-test-id="headline_june_01"
   data-landing-id="mortgage_lp_01"
   data-variant-id="A"
-  data-ab-click-selector=".btn-primary"
-  data-ab-submit-selector="form"
+  data-ab-clicks='{"hero_cta": ".button-aLgelNHdkl_btn", "footer_cta": ".button-xYz123_btn"}'
+  data-ab-submits='{"main_form": "form"}'
 ></script>
 ```
 
-**How to find the right CSS selector:**
+The format is JSON: `{"your_name": ".css-selector"}`. You choose the name, the CSS selector targets the GHL element.
+
+- `hero_cta`, `footer_cta`, `main_form` — **these are your names**, they show up in the report data
+- `.button-aLgelNHdkl_btn` — **this is GHL's class**, you find it by inspecting the element
+
+**How to find the CSS selector for a GHL element:**
 
 1. Open the landing page in Chrome
 2. Right-click the CTA button > **Inspect**
-3. Look at the element's class name, e.g. `<a class="btn-primary hl_cta-button">`
-4. Use `.btn-primary` as your selector
+3. Look at the element's class name, e.g. `<a class="button-aLgelNHdkl_btn">`
+4. Use `.button-aLgelNHdkl_btn` as the selector
+5. Give it a human-readable name like `hero_cta`
 
-You can combine multiple selectors with commas:
+**You can track multiple buttons separately:**
+```html
+data-ab-clicks='{"hero_cta": ".button-abc123", "footer_cta": ".button-xyz789", "sidebar_cta": "#sidebar-btn"}'
 ```
-data-ab-click-selector=".btn-primary, .hl_cta-button, #hero-cta"
-```
+
+Each one gets its own name in the data, so you know exactly which button was clicked.
 
 **Selector syntax:**
 - `.class-name` — matches a CSS class
 - `#element-id` — matches an id
 - `button` — matches a tag name
-- `.btn, .cta` — matches either (comma = OR)
+
+**Simple mode (single unnamed selector)** — still works but not recommended for GHL because you can't tell buttons apart:
+```html
+data-ab-click-selector=".btn-primary"
+data-ab-submit-selector="form"
+```
 
 ### Option C: Typeform, Calendly, or other embeds
 
@@ -140,24 +153,26 @@ For Typeform specifically, use their `onSubmit` callback:
   data-test-id="headline_june_01"
   data-landing-id="mortgage_lp_01"
   data-variant-id="A"
-  data-ab-click-selector=".btn-primary"
-  data-ab-submit-selector="form"
+  data-ab-clicks='{"hero_cta": ".button-aLgelNHdkl_btn", "footer_cta": ".button-qWerty_btn"}'
+  data-ab-submits='{"main_form": "form"}'
 ></script>
 ```
 
-**Variant B page** — same but change variant-id:
+**Variant B page** — same but change variant-id (and selectors if GHL generates different classes per page):
 ```html
 <script
   src="https://cro-tracking.onrender.com/ab.js"
   data-test-id="headline_june_01"
   data-landing-id="mortgage_lp_01"
   data-variant-id="B"
-  data-ab-click-selector=".btn-primary"
-  data-ab-submit-selector="form"
+  data-ab-clicks='{"hero_cta": ".button-Zxcvbn_btn", "footer_cta": ".button-Asdfgh_btn"}'
+  data-ab-submits='{"main_form": "form"}'
 ></script>
 ```
 
-**Only `data-variant-id` changes between variants. Everything else stays the same.**
+**What stays the same between variants:** `data-test-id`, `data-landing-id`, and the **names** you give each button (`hero_cta`, `footer_cta`).
+
+**What changes:** `data-variant-id` and the **CSS selectors** (because GHL generates different classes per page).
 
 ---
 
