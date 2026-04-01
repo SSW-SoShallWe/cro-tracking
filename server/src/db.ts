@@ -8,6 +8,7 @@ dns.setDefaultResultOrder('ipv4first');
 export const pool = new Pool({
   connectionString: config.databaseUrl,
   ssl: config.databaseUrl.includes('supabase.co') ? { rejectUnauthorized: false } : false,
+  options: '-csearch_path=cro_tracking',
 });
 
 export async function checkConnection(): Promise<void> {
