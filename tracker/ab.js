@@ -92,10 +92,20 @@
   }
 
   // --- Auto: variant_view (once per session+test+variant) ---
+  // data-view-delay="250" delays the view event so A/B tools that redirect
+  // (e.g. from variant A → B) don't log a view on the intermediate page.
+  var viewDelay = parseInt(scriptTag.getAttribute('data-view-delay'), 10) || 0;
   var viewKey = 'view:' + testId + ':' + variantId;
-  if (!wasSent(viewKey)) {
-    sendEvent('variant_view');
-    markSent(viewKey);
+  function fireView() {
+    if (!wasSent(viewKey)) {
+      sendEvent('variant_view');
+      markSent(viewKey);
+    }
+  }
+  if (viewDelay > 0) {
+    setTimeout(fireView, viewDelay);
+  } else {
+    fireView();
   }
 
   // --- Auto: cta_click ---
