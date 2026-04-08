@@ -7,6 +7,7 @@ import { reportRouter } from './report';
 import { corsMiddleware, rateLimiter, trackingKeyCheck } from './middleware';
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(corsMiddleware);
 app.use(express.json({ limit: '16kb' }));
