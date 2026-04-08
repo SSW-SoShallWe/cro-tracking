@@ -9,7 +9,7 @@ export function buildReportQuery(testId: string) {
       COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'variant_view')  AS views,
       COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'cta_click')     AS clicks,
       COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'form_submit')   AS submits
-    FROM ab_events
+    FROM cro_tracking.ab_events
     WHERE test_id = $1
     GROUP BY variant_id
     ORDER BY variant_id
