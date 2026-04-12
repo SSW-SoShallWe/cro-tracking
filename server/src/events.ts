@@ -29,7 +29,8 @@ eventsRouter.post('/events', async (req: Request, res: Response) => {
     await pool.query(
       `INSERT INTO cro_tracking.ab_events (event_name, test_id, landing_id, variant_id, session_id, cta_id, form_id, page_url, raw_payload)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       ON CONFLICT (session_id, test_id, variant_id) WHERE event_name = 'variant_view' DO NOTHING`,
+       ON CONFLICT (session_id, test_id) WHERE event_name = 'variant_view'
+       DO UPDATE SET variant_id = EXCLUDED.variant_id, landing_id = EXCLUDED.landing_id, page_url = EXCLUDED.page_url, raw_payload = EXCLUDED.raw_payload, created_at = now()`,
       [e.event_name, e.test_id, e.landing_id, e.variant_id, e.session_id, e.cta_id || null, e.form_id || null, e.page_url || null, JSON.stringify(e)]
     );
     res.status(201).json({ ok: true });
