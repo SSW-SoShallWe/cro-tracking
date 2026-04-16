@@ -2,7 +2,24 @@ import { Router, Request, Response } from 'express';
 import { pool } from './db';
 import { TestReport } from './types';
 
-export function buildReportQuery(testId: string) {
+export interface ReportFilters {
+  from?: string;
+  to?: string;
+}
+
+export function buildReportQuery(testId: string, filters: ReportFilters = {}) {
+  const params: (string)[] = [testId];
+  const conditions: string[] = ['test_id = $1'];
+
+  if (filters.from) {
+    params.push(filters.from);
+    conditions.push(`created_at >= $${params.length}`);
+  }
+  if (filters.to) {
+    params.push(filters.to);
+    conditions.push(`created_at <= $${params.length}`);
+  }
+
   const sql = `
     SELECT
       variant_id,
@@ -10,11 +27,16 @@ export function buildReportQuery(testId: string) {
       COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'cta_click')     AS clicks,
       COUNT(DISTINCT session_id) FILTER (WHERE event_name = 'form_submit')   AS submits
     FROM cro_tracking.ab_events
-    WHERE test_id = $1
+    WHERE ${conditions.join(' AND ')}
     GROUP BY variant_id
     ORDER BY variant_id
   `;
-  return { sql, params: [testId] };
+  return { sql, params };
+}
+
+function isValidIsoDate(s: string): boolean {
+  const d = new Date(s);
+  return !Number.isNaN(d.getTime());
 }
 
 export const reportRouter = Router();
@@ -27,8 +49,20 @@ reportRouter.get('/tests/:testId/report', async (req: Request, res: Response) =>
     return;
   }
 
+  const from = typeof req.query.from === 'string' ? req.query.from : undefined;
+  const to = typeof req.query.to === 'string' ? req.query.to : undefined;
+
+  if (from && !isValidIsoDate(from)) {
+    res.status(400).json({ error: 'Invalid from date' });
+    return;
+  }
+  if (to && !isValidIsoDate(to)) {
+    res.status(400).json({ error: 'Invalid to date' });
+    return;
+  }
+
   try {
-    const { sql, params } = buildReportQuery(testId);
+    const { sql, params } = buildReportQuery(testId, { from, to });
     const result = await pool.query(sql, params);
 
     const variants = result.rows.map(row => {
