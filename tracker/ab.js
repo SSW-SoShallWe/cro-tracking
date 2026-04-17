@@ -110,6 +110,8 @@
 
   // --- Auto: cta_click ---
   document.addEventListener('click', function (e) {
+    // Ignore programmatic clicks (element.click(), dispatchEvent, widget auto-fires)
+    if (!e.isTrusted) return;
     // Match by data-ab-click attribute
     var el = e.target.closest('[data-ab-click]');
     if (el) {
